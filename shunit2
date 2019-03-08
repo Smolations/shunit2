@@ -1,5 +1,4 @@
-#! /bin/sh
-# vim:et:ft=sh:sts=2:sw=2
+#! /bin/bash
 #
 # Copyright 2008-2019 Kate Ward. All Rights Reserved.
 # Released under the Apache 2.0 license.
@@ -929,7 +928,7 @@ _shunit_mktempFunc() {
   do
     _shunit_file_="${__shunit_tmpDir}/${_shunit_func_}"
     command cat <<EOF >"${_shunit_file_}"
-#! /bin/sh
+#! /bin/bash
 exit ${SHUNIT_TRUE}
 EOF
     command chmod +x "${_shunit_file_}"
@@ -1056,9 +1055,10 @@ _shunit_execSuite() {
     echo "${__SHUNIT_TEST_PREFIX}${_shunit_test_}"
     eval "${_shunit_test_}"
     if command [ $? -ne ${SHUNIT_TRUE} ]; then
-      _shunit_error "${_shunit_test_}() returned non-zero return code."
+      # _shunit_error "${_shunit_test_}() returned non-zero return code."
       __shunit_testSuccess=${SHUNIT_ERROR}
-      _shunit_incFailedCount
+      # echo "_shunit_execSuite failing..."
+      # _shunit_incFailedCount
     fi
 
     # Execute the per-test tear-down function.
@@ -1146,10 +1146,11 @@ _shunit_assertPass() {
 #   message: string: failure message to provide user
 _shunit_assertFail() {
   __shunit_testSuccess=${SHUNIT_FALSE}
+  # echo "_shunit_assertFail increasing count"
   _shunit_incFailedCount
 
   \[ $# -gt 0 ] && ${__SHUNIT_CMD_ECHO_ESC} \
-      "${__shunit_ansi_red}ASSERT:${__shunit_ansi_none}$*"
+      "   \`--${__shunit_ansi_red}ASSERT:${__shunit_ansi_none} $*"
 }
 
 # Increment the count of failed asserts.
@@ -1157,6 +1158,7 @@ _shunit_assertFail() {
 # Args:
 #   none
 _shunit_incFailedCount() {
+  # echo "failed++"
   __shunit_assertsFailed=`expr "${__shunit_assertsFailed}" + 1`
   __shunit_assertsTotal=`expr "${__shunit_assertsTotal}" + 1`
 }
@@ -1238,9 +1240,9 @@ _shunit_escapeCharactersInString() {
 _shunit_extractTestFunctions() {
   _shunit_script_=$1
 
-  # Extract the lines with test function names, strip of anything besides the
+  # Extract the lines with test function names, strip off anything besides the
   # function name, and output everything on a single line.
-  _shunit_regex_='^\s*((function test[A-Za-z0-9_-]*)|(test[A-Za-z0-9_-]* *\(\)))'
+  _shunit_regex_='^\s*((function (test|it)[A-Za-z0-9_-]*)|((test|it)[A-Za-z0-9_-]* *\(\)))'
   # shellcheck disable=SC2196
   egrep "${_shunit_regex_}" "${_shunit_script_}" \
   |sed 's/^[^A-Za-z0-9_-]*//;s/^function //;s/\([A-Za-z0-9_-]*\).*/\1/g' \
